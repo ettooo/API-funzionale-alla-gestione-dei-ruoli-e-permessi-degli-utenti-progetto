@@ -1,0 +1,8 @@
+{
+  "name": "PHP + MySQL",
+  "image": "mcr.microsoft.com/devcontainers/php:1-8.3",
+  "features": {
+    "ghcr.io/devcontainers/features/mysql-client:1": {}
+  },
+  "forwardPorts": [8080]
+}
