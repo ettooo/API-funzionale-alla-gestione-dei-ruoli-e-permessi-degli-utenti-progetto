@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Creato il: Mar 01, 2026 alle 22:14
+-- Creato il: Mar 12, 2026 alle 23:11
 -- Versione del server: 10.4.32-MariaDB
 -- Versione PHP: 8.2.12
 
@@ -20,6 +20,55 @@ SET time_zone = "+00:00";
 --
 -- Database: `auth_system`
 --
+
+-- --------------------------------------------------------
+
+--
+-- Struttura della tabella `alerts`
+--
+
+CREATE TABLE `alerts` (
+  `id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `symbol` varchar(10) NOT NULL,
+  `condition_type` enum('above','below') NOT NULL,
+  `threshold` decimal(15,2) NOT NULL,
+  `is_active` tinyint(1) DEFAULT 1,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Struttura della tabella `market_data`
+--
+
+CREATE TABLE `market_data` (
+  `id` int(11) NOT NULL,
+  `symbol` varchar(10) NOT NULL,
+  `name` varchar(100) DEFAULT NULL,
+  `price` decimal(15,2) DEFAULT NULL,
+  `change_pct` decimal(5,2) DEFAULT NULL,
+  `volume` bigint(20) DEFAULT NULL,
+  `market_cap` bigint(20) DEFAULT NULL,
+  `fetched_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dump dei dati per la tabella `market_data`
+--
+
+INSERT INTO `market_data` (`id`, `symbol`, `name`, `price`, `change_pct`, `volume`, `market_cap`, `fetched_at`) VALUES
+(1, 'AAPL', 'Apple Inc.', 227.50, 1.23, 54000000, 3400000000000, '2026-03-12 22:09:34'),
+(2, 'MSFT', 'Microsoft Corp.', 415.20, 0.87, 22000000, 3100000000000, '2026-03-12 22:09:34'),
+(3, 'GOOGL', 'Alphabet Inc.', 175.80, -0.45, 18000000, 2200000000000, '2026-03-12 22:09:34'),
+(4, 'AMZN', 'Amazon.com Inc.', 205.60, 2.10, 31000000, 2100000000000, '2026-03-12 22:09:34'),
+(5, 'TSLA', 'Tesla Inc.', 245.30, -1.80, 89000000, 780000000000, '2026-03-12 22:09:34'),
+(6, 'NVDA', 'NVIDIA Corp.', 875.40, 3.50, 42000000, 2150000000000, '2026-03-12 22:09:34'),
+(7, 'META', 'Meta Platforms Inc.', 525.10, 1.15, 16000000, 1350000000000, '2026-03-12 22:09:34'),
+(8, 'BRK.B', 'Berkshire Hathaway', 390.20, 0.30, 4000000, 855000000000, '2026-03-12 22:09:34'),
+(9, 'JPM', 'JPMorgan Chase', 215.80, 0.65, 11000000, 620000000000, '2026-03-12 22:09:34'),
+(10, 'V', 'Visa Inc.', 280.40, 0.42, 7000000, 575000000000, '2026-03-12 22:09:34');
 
 -- --------------------------------------------------------
 
@@ -49,7 +98,43 @@ INSERT INTO `permissions` (`id`, `name`, `description`, `created_at`) VALUES
 (8, 'manage_roles', 'Gestione dei ruoli (admin)', '2026-02-26 18:28:34'),
 (9, 'view_reports', 'Visualizzare report e statistiche', '2026-02-26 18:28:34'),
 (10, 'manage_content', 'Creare/modificare contenuti (admin)', '2026-02-26 18:28:34'),
-(11, 'manage_permissions', 'CRUD sui permessi degli utenti via API REST', '2026-02-26 19:36:09');
+(11, 'manage_permissions', 'CRUD sui permessi degli utenti via API REST', '2026-02-26 19:36:09'),
+(12, 'view_market_data', 'Visualizzare dati di mercato base', '2026-03-12 22:09:12'),
+(13, 'view_market_advanced', 'Indicatori avanzati e storico esteso', '2026-03-12 22:09:12'),
+(14, 'view_ai_analysis', 'Analisi predittiva AI (solo Premium)', '2026-03-12 22:09:12'),
+(15, 'run_simulation', 'Simulazioni Monte Carlo e backtesting', '2026-03-12 22:09:12'),
+(16, 'set_basic_alerts', 'Alert su soglie di prezzo (Free)', '2026-03-12 22:09:12'),
+(17, 'set_advanced_alerts', 'Alert avanzati e segnali AI (Premium)', '2026-03-12 22:09:12'),
+(18, 'manage_portfolio', 'Gestione portafoglio virtuale', '2026-03-12 22:09:12'),
+(19, 'manage_multi_portfolio', 'Portafogli multipli (Premium)', '2026-03-12 22:09:12');
+
+-- --------------------------------------------------------
+
+--
+-- Struttura della tabella `portfolios`
+--
+
+CREATE TABLE `portfolios` (
+  `id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `name` varchar(100) DEFAULT 'Portafoglio principale',
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Struttura della tabella `portfolio_items`
+--
+
+CREATE TABLE `portfolio_items` (
+  `id` int(11) NOT NULL,
+  `portfolio_id` int(11) NOT NULL,
+  `symbol` varchar(10) NOT NULL,
+  `quantity` int(11) NOT NULL,
+  `purchase_price` decimal(15,2) NOT NULL,
+  `purchased_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -117,12 +202,23 @@ INSERT INTO `role_permissions` (`role_id`, `permission_id`) VALUES
 (1, 2),
 (1, 3),
 (1, 4),
+(1, 12),
+(1, 16),
+(1, 18),
 (2, 1),
 (2, 2),
 (2, 3),
 (2, 4),
 (2, 5),
 (2, 6),
+(2, 12),
+(2, 13),
+(2, 14),
+(2, 15),
+(2, 16),
+(2, 17),
+(2, 18),
+(2, 19),
 (3, 1),
 (3, 2),
 (3, 3),
@@ -133,7 +229,15 @@ INSERT INTO `role_permissions` (`role_id`, `permission_id`) VALUES
 (3, 8),
 (3, 9),
 (3, 10),
-(3, 11);
+(3, 11),
+(3, 12),
+(3, 13),
+(3, 14),
+(3, 15),
+(3, 16),
+(3, 17),
+(3, 18),
+(3, 19);
 
 -- --------------------------------------------------------
 
@@ -172,7 +276,19 @@ CREATE TABLE `users` (
 INSERT INTO `users` (`id`, `username`, `email`, `password_hash`, `role_id`, `is_active`, `created_at`, `updated_at`) VALUES
 (1, 'admin', 'admin@example.com', '$2y$12$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 3, 1, '2026-02-26 18:28:34', '2026-02-26 18:28:34'),
 (2, 'gatto@gmail.com', 'gatto@gmail.com', '$2y$12$7JkKXjZcG1V6CnZAZ/g3ce/vBSpKcKhmzY5IpWBX/dPWC9wJ.s.o6', 1, 1, '2026-02-26 18:50:27', '2026-02-26 18:50:27'),
-(3, 'banano@gmail.com', 'banano@gmail.com', '$2y$12$u9qvhWVM2z3bKZfIjUhyh.HPFM7VmkOlxpYg/wpWeKP.3D88HJyHy', 1, 1, '2026-02-26 18:52:43', '2026-02-26 18:52:43');
+(3, 'banano@gmail.com', 'banano@gmail.com', '$2y$12$u9qvhWVM2z3bKZfIjUhyh.HPFM7VmkOlxpYg/wpWeKP.3D88HJyHy', 1, 1, '2026-02-26 18:52:43', '2026-02-26 18:52:43'),
+(4, 'criceto', 'criceto@criceto.com', '$2y$12$b3Pl7rfPhWq7X9SDghIzdOgIhLDpiMl41Bd4IV4oxAFOj78MwwYmO', 1, 1, '2026-03-12 21:54:45', '2026-03-12 21:54:45');
+
+-- --------------------------------------------------------
+
+--
+-- Struttura della tabella `user_permissions`
+--
+
+CREATE TABLE `user_permissions` (
+  `user_id` int(11) NOT NULL,
+  `permission_id` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -282,11 +398,38 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW 
 --
 
 --
+-- Indici per le tabelle `alerts`
+--
+ALTER TABLE `alerts`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `user_id` (`user_id`);
+
+--
+-- Indici per le tabelle `market_data`
+--
+ALTER TABLE `market_data`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- Indici per le tabelle `permissions`
 --
 ALTER TABLE `permissions`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `name` (`name`);
+
+--
+-- Indici per le tabelle `portfolios`
+--
+ALTER TABLE `portfolios`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `user_id` (`user_id`);
+
+--
+-- Indici per le tabelle `portfolio_items`
+--
+ALTER TABLE `portfolio_items`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `portfolio_id` (`portfolio_id`);
 
 --
 -- Indici per le tabelle `refresh_tokens`
@@ -328,6 +471,13 @@ ALTER TABLE `users`
   ADD KEY `role_id` (`role_id`);
 
 --
+-- Indici per le tabelle `user_permissions`
+--
+ALTER TABLE `user_permissions`
+  ADD PRIMARY KEY (`user_id`,`permission_id`),
+  ADD KEY `permission_id` (`permission_id`);
+
+--
 -- Indici per le tabelle `user_portfolios`
 --
 ALTER TABLE `user_portfolios`
@@ -338,10 +488,34 @@ ALTER TABLE `user_portfolios`
 --
 
 --
+-- AUTO_INCREMENT per la tabella `alerts`
+--
+ALTER TABLE `alerts`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT per la tabella `market_data`
+--
+ALTER TABLE `market_data`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+
+--
 -- AUTO_INCREMENT per la tabella `permissions`
 --
 ALTER TABLE `permissions`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
+
+--
+-- AUTO_INCREMENT per la tabella `portfolios`
+--
+ALTER TABLE `portfolios`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT per la tabella `portfolio_items`
+--
+ALTER TABLE `portfolio_items`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT per la tabella `refresh_tokens`
@@ -365,11 +539,29 @@ ALTER TABLE `stocks`
 -- AUTO_INCREMENT per la tabella `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- Limiti per le tabelle scaricate
 --
+
+--
+-- Limiti per la tabella `alerts`
+--
+ALTER TABLE `alerts`
+  ADD CONSTRAINT `alerts_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
+
+--
+-- Limiti per la tabella `portfolios`
+--
+ALTER TABLE `portfolios`
+  ADD CONSTRAINT `portfolios_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
+
+--
+-- Limiti per la tabella `portfolio_items`
+--
+ALTER TABLE `portfolio_items`
+  ADD CONSTRAINT `portfolio_items_ibfk_1` FOREIGN KEY (`portfolio_id`) REFERENCES `portfolios` (`id`) ON DELETE CASCADE;
 
 --
 -- Limiti per la tabella `refresh_tokens`
@@ -389,6 +581,13 @@ ALTER TABLE `role_permissions`
 --
 ALTER TABLE `users`
   ADD CONSTRAINT `users_ibfk_1` FOREIGN KEY (`role_id`) REFERENCES `roles` (`id`);
+
+--
+-- Limiti per la tabella `user_permissions`
+--
+ALTER TABLE `user_permissions`
+  ADD CONSTRAINT `user_permissions_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `user_permissions_ibfk_2` FOREIGN KEY (`permission_id`) REFERENCES `permissions` (`id`) ON DELETE CASCADE;
 
 --
 -- Limiti per la tabella `user_portfolios`

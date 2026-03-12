@@ -1,20 +1,14 @@
 <?php
-// ============================================
-// login.php
-// ============================================
 require_once __DIR__ . '/config/auth.php';
 startSession();
 
-// Se già loggato, redirect dashboard
 if (!empty($_SESSION['user_id'])) {
     header('Location: dashboard.php');
     exit;
 }
 
 $error = '';
-
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Protezione CSRF
     if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== ($_SESSION['csrf_token'] ?? '')) {
         $error = 'Richiesta non valida. Riprova.';
     } else {
@@ -27,7 +21,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-// Genera CSRF token
 $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 $csrfToken = $_SESSION['csrf_token'];
 ?>
@@ -36,185 +29,225 @@ $csrfToken = $_SESSION['csrf_token'];
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login — AuthSystem</title>
+    <title>Login | AuthSystem Pro</title>
     <style>
-        /* ===== RESET & BASE ===== */
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=Fraunces:opsz,wght@9..144,600&display=swap');
 
         :root {
-            --bg:        #0f1117;
-            --surface:   #1a1d2e;
-            --card:      #20243a;
-            --border:    #2e3250;
-            --accent:    #6c63ff;
-            --accent2:   #ff6584;
-            --text:      #e8eaf0;
-            --muted:     #8b90a8;
-            --success:   #4caf83;
-            --error:     #ff5370;
-            --radius:    14px;
+            --bg: #f4f7fb;
+            --surface: #ffffff;
+            --text: #11213a;
+            --muted: #5f6f88;
+            --line: #d9e2ef;
+            --brand: #0f6cbd;
+            --brand-2: #22a699;
+            --danger: #b42318;
+            --ok: #067647;
+            --shadow: 0 20px 45px rgba(17, 33, 58, 0.14);
+            --radius-xl: 22px;
+            --radius-md: 12px;
         }
 
+        * { box-sizing: border-box; }
         body {
+            margin: 0;
             min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: var(--bg);
-            font-family: 'Segoe UI', system-ui, sans-serif;
+            font-family: 'Manrope', sans-serif;
             color: var(--text);
-            padding: 20px;
-            background-image:
-                radial-gradient(ellipse at 20% 50%, rgba(108,99,255,.12) 0%, transparent 60%),
-                radial-gradient(ellipse at 80% 20%, rgba(255,101,132,.08) 0%, transparent 50%);
+            background:
+                radial-gradient(circle at 15% 10%, rgba(34,166,153,0.18), transparent 35%),
+                radial-gradient(circle at 85% 80%, rgba(15,108,189,0.18), transparent 30%),
+                linear-gradient(145deg, #eef3f9 0%, #f8fbff 100%);
+            display: grid;
+            place-items: center;
+            padding: 24px;
         }
 
-        /* ===== CARD ===== */
-        .card {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            padding: 44px 40px;
-            width: 100%;
-            max-width: 420px;
-            box-shadow: 0 24px 60px rgba(0,0,0,.5);
-        }
-
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 32px;
-        }
-        .logo-icon {
-            width: 40px; height: 40px;
-            background: linear-gradient(135deg, var(--accent), var(--accent2));
-            border-radius: 10px;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 20px;
-        }
-        .logo-text { font-size: 22px; font-weight: 700; }
-        .logo-text span { color: var(--accent); }
-
-        h1 { font-size: 26px; font-weight: 700; margin-bottom: 6px; }
-        .subtitle { color: var(--muted); font-size: 14px; margin-bottom: 28px; }
-
-        /* ===== FORM ===== */
-        .form-group { margin-bottom: 18px; }
-        label { display: block; font-size: 13px; font-weight: 600; color: var(--muted); margin-bottom: 7px; text-transform: uppercase; letter-spacing: .5px; }
-
-        input[type="email"],
-        input[type="password"],
-        input[type="text"] {
-            width: 100%;
-            padding: 12px 16px;
+        .shell {
+            width: min(980px, 100%);
             background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 9px;
-            color: var(--text);
-            font-size: 15px;
-            transition: border-color .2s, box-shadow .2s;
-            outline: none;
+            border: 1px solid var(--line);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            display: grid;
+            grid-template-columns: 1.1fr 1fr;
+            animation: rise .45s ease-out;
         }
+
+        .panel {
+            padding: 42px;
+            background: linear-gradient(160deg, #0f6cbd 0%, #0e5aa2 45%, #0c436f 100%);
+            color: #f5f9ff;
+            position: relative;
+        }
+
+        .panel::after {
+            content: '';
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.08);
+            right: -120px;
+            top: -80px;
+        }
+
+        .brand {
+            font-family: 'Fraunces', serif;
+            font-size: 1.8rem;
+            margin: 0 0 22px;
+            letter-spacing: .3px;
+        }
+
+        .panel h1 {
+            margin: 0 0 12px;
+            font-size: 1.9rem;
+            line-height: 1.2;
+        }
+
+        .panel p {
+            margin: 0;
+            color: rgba(245,249,255,.9);
+            line-height: 1.7;
+        }
+
+        .form-wrap {
+            padding: 42px;
+            background: #fff;
+        }
+
+        .form-wrap h2 {
+            margin: 0;
+            font-size: 1.4rem;
+            font-weight: 800;
+        }
+
+        .sub {
+            margin: 8px 0 24px;
+            color: var(--muted);
+            font-size: .95rem;
+        }
+
+        label {
+            display: block;
+            margin: 0 0 8px;
+            font-size: .8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .06em;
+            color: #314766;
+        }
+
+        .field { margin-bottom: 16px; }
+
+        input {
+            width: 100%;
+            border: 1px solid var(--line);
+            border-radius: var(--radius-md);
+            padding: 12px 14px;
+            font: inherit;
+            color: var(--text);
+            background: #fbfdff;
+            transition: border-color .2s, box-shadow .2s;
+        }
+
         input:focus {
-            border-color: var(--accent);
-            box-shadow: 0 0 0 3px rgba(108,99,255,.2);
+            outline: none;
+            border-color: var(--brand);
+            box-shadow: 0 0 0 4px rgba(15,108,189,.14);
         }
 
         .btn {
             width: 100%;
-            padding: 13px;
-            background: linear-gradient(135deg, var(--accent), #8b5cf6);
+            margin-top: 8px;
+            border: 0;
+            border-radius: var(--radius-md);
+            background: linear-gradient(135deg, var(--brand), #0f86d6);
             color: #fff;
-            font-size: 15px;
-            font-weight: 600;
-            border: none;
-            border-radius: 9px;
+            padding: 12px 14px;
+            font: inherit;
+            font-weight: 700;
             cursor: pointer;
-            transition: opacity .2s, transform .1s;
-            margin-top: 6px;
         }
-        .btn:hover  { opacity: .92; }
-        .btn:active { transform: scale(.98); }
 
-        /* ===== ALERT ===== */
+        .btn:hover { filter: brightness(1.03); }
+
         .alert {
-            padding: 12px 16px;
-            border-radius: 9px;
-            font-size: 14px;
-            margin-bottom: 20px;
-            display: flex; align-items: center; gap: 10px;
+            margin-bottom: 16px;
+            border-radius: var(--radius-md);
+            padding: 11px 12px;
+            font-size: .92rem;
+            border: 1px solid;
         }
-        .alert-error   { background: rgba(255,83,112,.12); border: 1px solid rgba(255,83,112,.3); color: var(--error); }
-        .alert-success { background: rgba(76,175,131,.12); border: 1px solid rgba(76,175,131,.3); color: var(--success); }
 
-        /* ===== SWITCH LINK ===== */
-        .switch { text-align: center; margin-top: 22px; font-size: 14px; color: var(--muted); }
-        .switch a { color: var(--accent); text-decoration: none; font-weight: 600; }
-        .switch a:hover { text-decoration: underline; }
+        .alert.error { color: var(--danger); background: #fef3f2; border-color: #fecdca; }
+        .alert.ok { color: var(--ok); background: #ecfdf3; border-color: #abefc6; }
 
-        /* ===== DEMO HINT ===== */
-        .demo-hint {
-            margin-top: 24px;
-            padding: 14px;
-            background: var(--surface);
-            border: 1px dashed var(--border);
-            border-radius: 9px;
-            font-size: 12px;
+        .switch {
+            margin-top: 20px;
+            text-align: center;
             color: var(--muted);
-            line-height: 1.7;
+            font-size: .92rem;
         }
-        .demo-hint strong { color: var(--text); }
+
+        .switch a {
+            color: var(--brand);
+            font-weight: 700;
+            text-decoration: none;
+        }
+
+        @keyframes rise {
+            from { opacity: 0; transform: translateY(12px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 860px) {
+            .shell { grid-template-columns: 1fr; }
+            .panel { padding: 28px; }
+            .form-wrap { padding: 28px; }
+        }
     </style>
 </head>
 <body>
-<div class="card">
-    <div class="logo">
-        <div class="logo-icon">🔐</div>
-        <div class="logo-text">Auth<span>System</span></div>
+    <div class="shell">
+        <section class="panel">
+            <p class="brand">AuthSystem</p>
+            <h1>Accesso Sicuro Con Gestione Ruoli E Permessi</h1>
+            <p>Ambiente professionale per autenticazione, autorizzazioni granulari, API JWT e casi d'uso finance integrati.</p>
+        </section>
+
+        <section class="form-wrap">
+            <h2>Accedi Al Tuo Account</h2>
+            <p class="sub">Inserisci le tue credenziali per entrare nella dashboard.</p>
+
+            <?php if ($error): ?>
+                <div class="alert error"><?= htmlspecialchars($error) ?></div>
+            <?php endif; ?>
+
+            <?php if (!empty($_SESSION['flash_success'])): ?>
+                <div class="alert ok"><?= htmlspecialchars($_SESSION['flash_success']) ?></div>
+                <?php unset($_SESSION['flash_success']); ?>
+            <?php endif; ?>
+
+            <form method="POST" action="">
+                <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken) ?>">
+
+                <div class="field">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" value="<?= htmlspecialchars($_POST['email'] ?? '') ?>" required autofocus>
+                </div>
+
+                <div class="field">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+
+                <button class="btn" type="submit">Entra Nella Dashboard</button>
+            </form>
+
+            <p class="switch">Non hai un account? <a href="register.php">Registrati</a></p>
+        </section>
     </div>
-
-    <h1>Bentornato</h1>
-    <p class="subtitle">Accedi al tuo account per continuare</p>
-
-    <?php if ($error): ?>
-        <div class="alert alert-error">⚠️ <?= htmlspecialchars($error) ?></div>
-    <?php endif; ?>
-
-    <?php if (!empty($_SESSION['flash_success'])): ?>
-        <div class="alert alert-success">✅ <?= htmlspecialchars($_SESSION['flash_success']) ?></div>
-        <?php unset($_SESSION['flash_success']); ?>
-    <?php endif; ?>
-
-    <form method="POST" action="">
-        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken) ?>">
-
-        <div class="form-group">
-            <label for="email">Email</label>
-            <input type="email" id="email" name="email"
-                   placeholder="tuaemail@esempio.it"
-                   value="<?= htmlspecialchars($_POST['email'] ?? '') ?>"
-                   required autofocus>
-        </div>
-
-        <div class="form-group">
-            <label for="password">Password</label>
-            <input type="password" id="password" name="password"
-                   placeholder="••••••••" required>
-        </div>
-
-        <button type="submit" class="btn">Accedi →</button>
-    </form>
-
-    <div class="switch">
-        Non hai un account? <a href="register.php">Registrati gratis</a>
-    </div>
-
-    <div class="demo-hint">
-        <strong>🧪 Account demo admin:</strong><br>
-        Email: <code>admin@example.com</code><br>
-        Password: <code>Admin@1234</code>
-    </div>
-</div>
 </body>
 </html>

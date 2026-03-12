@@ -1,7 +1,4 @@
 <?php
-// ============================================
-// register.php
-// ============================================
 require_once __DIR__ . '/config/auth.php';
 startSession();
 
@@ -18,14 +15,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } else {
         $result = registerUser(
             $_POST['username'] ?? '',
-            $_POST['email']    ?? '',
+            $_POST['email'] ?? '',
             $_POST['password'] ?? ''
         );
+
         if ($result['success']) {
-            $_SESSION['flash_success'] = 'Registrazione completata! Ora puoi accedere.';
+            $_SESSION['flash_success'] = 'Registrazione completata. Ora puoi accedere.';
             header('Location: login.php');
             exit;
         }
+
         $error = $result['message'];
     }
 }
@@ -38,146 +37,221 @@ $csrfToken = $_SESSION['csrf_token'];
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Registrazione — AuthSystem</title>
+    <title>Registrazione | AuthSystem Pro</title>
     <style>
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=Fraunces:opsz,wght@9..144,600&display=swap');
+
         :root {
-            --bg: #0f1117; --surface: #1a1d2e; --card: #20243a; --border: #2e3250;
-            --accent: #6c63ff; --accent2: #ff6584; --text: #e8eaf0; --muted: #8b90a8;
-            --success: #4caf83; --error: #ff5370; --radius: 14px;
+            --bg: #f4f7fb;
+            --surface: #ffffff;
+            --text: #11213a;
+            --muted: #5f6f88;
+            --line: #d9e2ef;
+            --brand: #0f6cbd;
+            --brand-2: #22a699;
+            --danger: #b42318;
+            --radius-xl: 22px;
+            --radius-md: 12px;
+            --shadow: 0 20px 45px rgba(17, 33, 58, 0.14);
         }
+
+        * { box-sizing: border-box; }
         body {
-            min-height: 100vh; display: flex; align-items: center; justify-content: center;
-            background: var(--bg); font-family: 'Segoe UI', system-ui, sans-serif;
-            color: var(--text); padding: 20px;
-            background-image:
-                radial-gradient(ellipse at 80% 50%, rgba(108,99,255,.12) 0%, transparent 60%),
-                radial-gradient(ellipse at 20% 80%, rgba(255,101,132,.08) 0%, transparent 50%);
+            margin: 0;
+            min-height: 100vh;
+            display: grid;
+            place-items: center;
+            padding: 24px;
+            font-family: 'Manrope', sans-serif;
+            color: var(--text);
+            background:
+                radial-gradient(circle at 10% 20%, rgba(34,166,153,0.18), transparent 32%),
+                radial-gradient(circle at 90% 86%, rgba(15,108,189,0.2), transparent 30%),
+                linear-gradient(140deg, #eef3f9 0%, #f8fbff 100%);
         }
-        .card {
-            background: var(--card); border: 1px solid var(--border);
-            border-radius: var(--radius); padding: 44px 40px;
-            width: 100%; max-width: 420px;
-            box-shadow: 0 24px 60px rgba(0,0,0,.5);
+
+        .shell {
+            width: min(1020px, 100%);
+            background: #fff;
+            border: 1px solid var(--line);
+            border-radius: var(--radius-xl);
+            overflow: hidden;
+            display: grid;
+            grid-template-columns: 1fr 1.1fr;
+            box-shadow: var(--shadow);
+            animation: enter .45s ease-out;
         }
-        .logo { display: flex; align-items: center; gap: 10px; margin-bottom: 32px; }
-        .logo-icon {
-            width: 40px; height: 40px;
-            background: linear-gradient(135deg, var(--accent), var(--accent2));
-            border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px;
+
+        .form-wrap { padding: 40px; }
+
+        .panel {
+            padding: 40px;
+            background: linear-gradient(160deg, #0f6cbd 0%, #1f7fc8 45%, #22a699 100%);
+            color: #eef8ff;
+            position: relative;
         }
-        .logo-text { font-size: 22px; font-weight: 700; }
-        .logo-text span { color: var(--accent); }
-        h1 { font-size: 26px; font-weight: 700; margin-bottom: 6px; }
-        .subtitle { color: var(--muted); font-size: 14px; margin-bottom: 28px; }
-        .form-group { margin-bottom: 16px; }
-        label { display: block; font-size: 13px; font-weight: 600; color: var(--muted); margin-bottom: 7px; text-transform: uppercase; letter-spacing: .5px; }
-        input[type="email"], input[type="password"], input[type="text"] {
-            width: 100%; padding: 12px 16px; background: var(--surface);
-            border: 1px solid var(--border); border-radius: 9px;
-            color: var(--text); font-size: 15px; outline: none;
-            transition: border-color .2s, box-shadow .2s;
+
+        .panel::after {
+            content: '';
+            position: absolute;
+            width: 280px;
+            height: 280px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.12);
+            left: -120px;
+            bottom: -100px;
         }
-        input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(108,99,255,.2); }
+
+        .brand {
+            margin: 0 0 20px;
+            font-family: 'Fraunces', serif;
+            font-size: 1.8rem;
+            letter-spacing: .3px;
+        }
+
+        .panel h1 { margin: 0 0 12px; font-size: 1.9rem; line-height: 1.2; }
+        .panel p { margin: 0; line-height: 1.7; }
+
+        h2 { margin: 0; font-size: 1.4rem; font-weight: 800; }
+        .sub { margin: 8px 0 24px; color: var(--muted); font-size: .95rem; }
+
+        .alert {
+            margin-bottom: 16px;
+            border: 1px solid #fecdca;
+            background: #fef3f2;
+            color: var(--danger);
+            border-radius: var(--radius-md);
+            padding: 11px 12px;
+            font-size: .92rem;
+        }
+
+        .field { margin-bottom: 14px; }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: .8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .06em;
+            color: #314766;
+        }
+
+        input {
+            width: 100%;
+            border: 1px solid var(--line);
+            border-radius: var(--radius-md);
+            padding: 12px 14px;
+            font: inherit;
+            color: var(--text);
+            background: #fbfdff;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--brand);
+            box-shadow: 0 0 0 4px rgba(15,108,189,.14);
+        }
+
+        .pwd {
+            margin-top: 6px;
+            font-size: .82rem;
+            color: var(--muted);
+            line-height: 1.7;
+        }
+
+        .pwd .ok { color: #067647; }
+        .pwd .ko { color: #b42318; }
+
         .btn {
-            width: 100%; padding: 13px;
-            background: linear-gradient(135deg, var(--accent2), #e91e8c);
-            color: #fff; font-size: 15px; font-weight: 600;
-            border: none; border-radius: 9px; cursor: pointer;
-            transition: opacity .2s, transform .1s; margin-top: 6px;
-        }
-        .btn:hover { opacity: .92; }
-        .btn:active { transform: scale(.98); }
-        .alert { padding: 12px 16px; border-radius: 9px; font-size: 14px; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
-        .alert-error { background: rgba(255,83,112,.12); border: 1px solid rgba(255,83,112,.3); color: var(--error); }
-        .switch { text-align: center; margin-top: 22px; font-size: 14px; color: var(--muted); }
-        .switch a { color: var(--accent); text-decoration: none; font-weight: 600; }
-        .switch a:hover { text-decoration: underline; }
-
-        /* Badge ruolo gratuito */
-        .role-badge {
-            display: inline-flex; align-items: center; gap: 6px;
-            background: rgba(108,99,255,.12); border: 1px solid rgba(108,99,255,.3);
-            color: #a5a1ff; padding: 5px 12px; border-radius: 20px;
-            font-size: 13px; font-weight: 600; margin-bottom: 24px;
+            width: 100%;
+            margin-top: 8px;
+            border: 0;
+            border-radius: var(--radius-md);
+            background: linear-gradient(135deg, var(--brand), #0f86d6);
+            color: #fff;
+            padding: 12px 14px;
+            font: inherit;
+            font-weight: 700;
+            cursor: pointer;
         }
 
-        /* Password strength */
-        .pwd-hints { font-size: 12px; color: var(--muted); margin-top: 6px; line-height: 1.6; }
-        .pwd-hints span { display: inline-block; margin-right: 8px; }
-        .pwd-hints .ok   { color: var(--success); }
-        .pwd-hints .fail { color: var(--error); }
+        .switch {
+            margin-top: 20px;
+            text-align: center;
+            color: var(--muted);
+            font-size: .92rem;
+        }
+
+        .switch a { color: var(--brand); text-decoration: none; font-weight: 700; }
+
+        @keyframes enter {
+            from { opacity: 0; transform: translateY(14px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 860px) {
+            .shell { grid-template-columns: 1fr; }
+            .form-wrap, .panel { padding: 28px; }
+        }
     </style>
 </head>
 <body>
-<div class="card">
-    <div class="logo">
-        <div class="logo-icon">🔐</div>
-        <div class="logo-text">Auth<span>System</span></div>
+    <div class="shell">
+        <section class="form-wrap">
+            <h2>Crea Il Tuo Account</h2>
+            <p class="sub">Registrazione con ruolo Free e attivazione immediata.</p>
+
+            <?php if ($error): ?>
+                <div class="alert"><?= htmlspecialchars($error) ?></div>
+            <?php endif; ?>
+
+            <form method="POST" action="">
+                <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken) ?>">
+
+                <div class="field">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username" minlength="3" maxlength="50" value="<?= htmlspecialchars($_POST['username'] ?? '') ?>" required autofocus>
+                </div>
+
+                <div class="field">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" value="<?= htmlspecialchars($_POST['email'] ?? '') ?>" required>
+                </div>
+
+                <div class="field">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" required oninput="checkPassword(this.value)">
+                    <div class="pwd" id="pwdHints">
+                        <div id="r1" class="ko">Minimo 8 caratteri</div>
+                        <div id="r2" class="ko">Almeno una lettera maiuscola</div>
+                        <div id="r3" class="ko">Almeno un numero</div>
+                    </div>
+                </div>
+
+                <button class="btn" type="submit">Completa Registrazione</button>
+            </form>
+
+            <p class="switch">Hai gia un account? <a href="login.php">Accedi</a></p>
+        </section>
+
+        <section class="panel">
+            <p class="brand">AuthSystem</p>
+            <h1>Piattaforma Pronta Per Ruoli, API JWT E Moduli Finance</h1>
+            <p>Il tuo account parte dal piano Free con accesso ai contenuti base, profilo e strumenti iniziali di portfolio e alert.</p>
+        </section>
     </div>
 
-    <h1>Crea un account</h1>
-    <p class="subtitle">Inizia gratuitamente, senza carta di credito</p>
+    <script>
+        function setRule(id, ok) {
+            const el = document.getElementById(id);
+            el.className = ok ? 'ok' : 'ko';
+        }
 
-    <div class="role-badge">🆓 Ruolo: Utente Free</div>
-
-    <?php if ($error): ?>
-        <div class="alert alert-error">⚠️ <?= htmlspecialchars($error) ?></div>
-    <?php endif; ?>
-
-    <form method="POST" action="" id="regForm">
-        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken) ?>">
-
-        <div class="form-group">
-            <label for="username">Username</label>
-            <input type="text" id="username" name="username"
-                   placeholder="mario_rossi" minlength="3" maxlength="50"
-                   value="<?= htmlspecialchars($_POST['username'] ?? '') ?>"
-                   required autofocus>
-        </div>
-
-        <div class="form-group">
-            <label for="email">Email</label>
-            <input type="email" id="email" name="email"
-                   placeholder="mario@esempio.it"
-                   value="<?= htmlspecialchars($_POST['email'] ?? '') ?>"
-                   required>
-        </div>
-
-        <div class="form-group">
-            <label for="password">Password</label>
-            <input type="password" id="password" name="password"
-                   placeholder="Min. 8 caratteri" required
-                   oninput="checkPassword(this.value)">
-            <div class="pwd-hints" id="pwdHints">
-                <span id="h-len">○ 8+ caratteri</span>
-                <span id="h-upper">○ Maiuscola</span>
-                <span id="h-num">○ Numero</span>
-            </div>
-        </div>
-
-        <button type="submit" class="btn">Registrati →</button>
-    </form>
-
-    <div class="switch">
-        Hai già un account? <a href="login.php">Accedi</a>
-    </div>
-</div>
-
-<script>
-function checkPassword(val) {
-    const len   = document.getElementById('h-len');
-    const upper = document.getElementById('h-upper');
-    const num   = document.getElementById('h-num');
-
-    function set(el, ok, label) {
-        el.textContent = (ok ? '✓ ' : '○ ') + label;
-        el.className   = ok ? 'ok' : 'fail';
-    }
-    set(len,   val.length >= 8,      '8+ caratteri');
-    set(upper, /[A-Z]/.test(val),    'Maiuscola');
-    set(num,   /[0-9]/.test(val),    'Numero');
-}
-</script>
+        function checkPassword(value) {
+            setRule('r1', value.length >= 8);
+            setRule('r2', /[A-Z]/.test(value));
+            setRule('r3', /[0-9]/.test(value));
+        }
+    </script>
 </body>
 </html>

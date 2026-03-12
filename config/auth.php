@@ -23,13 +23,18 @@ function startSession(): void {
 function getUserPermissions(int $userId): array {
     $pdo = getDB();
     $stmt = $pdo->prepare("
-        SELECT p.name
+            SELECT p.name
         FROM users u
         JOIN role_permissions rp ON u.role_id = rp.role_id
         JOIN permissions p       ON rp.permission_id = p.id
         WHERE u.id = ? AND u.is_active = 1
+            UNION
+            SELECT p.name
+            FROM user_permissions up
+            JOIN permissions p ON up.permission_id = p.id
+            WHERE up.user_id = ?
     ");
-    $stmt->execute([$userId]);
+        $stmt->execute([$userId, $userId]);
     return array_column($stmt->fetchAll(), 'name');
 }
 
@@ -126,10 +131,22 @@ function registerUser(string $username, string $email, string $password): array 
     $roleStmt = $pdo->prepare("SELECT id FROM roles WHERE name = 'free' LIMIT 1");
     $roleStmt->execute();
     $role = $roleStmt->fetch();
+        if (!$role) {
+            return ['success' => false, 'message' => "Ruolo 'free' non configurato nel database."];
+        }
 
     $hash = password_hash($password, PASSWORD_BCRYPT, ['cost' => 12]);
     $ins  = $pdo->prepare("INSERT INTO users (username, email, password_hash, role_id) VALUES (?, ?, ?, ?)");
     $ins->execute([$username, $email, $hash, $role['id']]);
+
+        // Crea un portfolio principale se la tabella esiste (casi d'uso finance).
+        $newUserId = (int) $pdo->lastInsertId();
+        try {
+            $pf = $pdo->prepare("INSERT INTO portfolios (user_id, name) VALUES (?, ?)");
+            $pf->execute([$newUserId, 'Portafoglio principale']);
+        } catch (Throwable $e) {
+            // Non blocca la registrazione se il modulo portfolio non e disponibile.
+        }
 
     return ['success' => true];
 }
